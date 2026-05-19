@@ -1,0 +1,6 @@
+ultralytics
+opencv-python
+pyserial
+smbus2
+numpy
+flask

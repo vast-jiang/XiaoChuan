@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+    <style>
+        body { font-family:sans-serif; background:#f4f4f7; color:#333; margin:0; display:flex; justify-content:center; }
+        .app { width:100%; max-width:500px; background:#fff; min-height:100vh; }
+        .header { padding:15px; border-bottom:1px solid #eee; font-weight:bold; display:flex; justify-content:space-between; }
+        .v-stream { width:100%; background:#000; display:block; height:240px; }
+       /* 传感器监控面板 3 列网格布局 */
+        .monitor { display:grid; grid-template-columns:repeat(3,1fr); border-bottom:1px solid #eee; background:#fafafa; }
+        
+        .m-item { padding:10px; text-align:center; border-right:1px solid #eee; }
+        .m-label { font-size:10px; color:#999; text-transform:uppercase; }
+        .m-val { font-size:14px; font-weight:600; }
+        .ctrls { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; padding:20px; }
+        button { 
+            padding:15px 5px; border:none; background:#f0f0f5; border-radius:8px; 
+            font-weight:bold; cursor:pointer; user-select:none; 
+            touch-action:none; 
+        }
+        button:active { background:#e2e2ed; }
+        .b-stop { color:red; }
+        .b-bait { grid-column:span 3; background:#52c41a; color:#fff; margin-top:10px; }
+    </style>
+</head>
+<body>
+<div class="app">
+    <div class="header"><span>控制终端</span><span id="stat" style="color:#52c41a">● 在线</span></div>
+    <img src="/stream" class="v-stream" alt="图传断开">
+    <div class="monitor">
+        <div class="m-item"><div class="m-label">距离</div><div id="d">--</div></div>
+        <div class="m-item"><div class="m-label">浊度</div><div id="n">--</div></div>
+        <div class="m-item" style="border:none"><div class="m-label">CPU温度</div><div id="t">--</div></div>
+    </div>
+    
+    <div class="ctrls">
+        <div></div>
+        <button onpointerdown="cmd('fw')" onpointerup="cmd('st')" onpointerleave="cmd('st')" onpointercancel="cmd('st')">前进</button>
+        <div></div>
+        
+        <button onpointerdown="cmd('lt')" onpointerup="cmd('ct')" onpointerleave="cmd('ct')" onpointercancel="cmd('ct')">左转</button>
+        <button class="b-stop" onclick="cmd('st')">停止</button>
+        <button onpointerdown="cmd('rt')" onpointerup="cmd('ct')" onpointerleave="cmd('ct')" onpointercancel="cmd('ct')">右转</button>
+        
+        <button class="b-bait" onclick="cmd('db')">启动自动投饵</button>
+    </div>
+</div>
+<script>
+    function cmd(q){ fetch('/c?q='+q).catch(()=>{}); }
+    
+    // 定时器：每 1000 毫秒 (1秒) 高效异步轮询一次底层传感器的数值
+    setInterval(()=>{
+        fetch('/t').then(r=>r.json()).then(d=>{
+            document.getElementById('d').innerText = d.d;
+            document.getElementById('n').innerText = d.n;
+            document.getElementById('t').innerText = d.t;
+        }).catch(()=>{});
+    }, 1000);
+</script>
+</body>
+</html>
